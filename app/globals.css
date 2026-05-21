@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+
+
+
+:root {
+  --blue-deep: #0A1628;
+  --blue-mid: #1E3A5F;
+  --blue-bright: #1D6FE8;
+  --blue-electric: #4D9EFF;
+  --blue-ice: #A8CFFF;
+  --blue-mist: #E8F1FF;
+  --white: #FFFFFF;
+  --white-soft: #F7FAFF;
+  --glass-bg: rgba(255,255,255,0.07);
+  --glass-border: rgba(255,255,255,0.15);
+  --shadow-blue: 0 8px 48px rgba(29,111,232,0.18);
+  --shadow-card: 0 2px 24px rgba(10,22,40,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--white);
+  color: var(--blue-deep);
+  overflow-x: hidden;
+}
+
+.font-display { font-family: 'Playfair Display', serif; }
+.font-mono { font-family: 'DM Mono', monospace; }
+
+/* Glass card */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* 3D orb */
+.orb {
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  position: absolute;
+}
+
+/* Animated gradient text */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #1D6FE8, #7DD3FC, #8B5CF6, #1D6FE8);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* 3D card hover */
+.card-3d {
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s ease;
+  transform-style: preserve-3d;
+}
+.card-3d:hover {
+  transform: translateY(-8px) rotateX(2deg);
+  box-shadow: 0 24px 64px rgba(29,111,232,0.2);
+}
+
+/* Pulse dot */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--blue-electric);
+  animation: pulse-dot 2s ease infinite;
+}
+
+/* Upload zone */
+.upload-zone {
+  border: 2px dashed rgba(29,111,232,0.35);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.upload-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(29,111,232,0.03), rgba(77,158,255,0.05));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.upload-zone:hover::before,
+.upload-zone.active::before {
+  opacity: 1;
+}
+.upload-zone:hover,
+.upload-zone.active {
+  border-color: var(--blue-bright);
+  box-shadow: 0 0 0 4px rgba(29,111,232,0.1);
+}
+
+/* Chat message */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.msg-appear { animation: slide-up 0.4s cubic-bezier(0.23,1,0.32,1) forwards; }
+
+/* Path card */
+.path-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(232,241,255,0.9));
+  border: 1px solid rgba(29,111,232,0.15);
+  transition: all 0.35s cubic-bezier(0.23,1,0.32,1);
+}
+.path-card:hover {
+  border-color: var(--blue-bright);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(29,111,232,0.18), inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(29,111,232,0.3); border-radius: 3px; }
+
+/* Loading shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f0f4ff 25%, #dbeafe 50%, #f0f4ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite;
+}
+
+/* Floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+.float { animation: float 4s ease-in-out infinite; }
+
+/* Step connector line */
+.step-line::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -40px;
+  width: 1px;
+  height: 32px;
+  background: linear-gradient(to bottom, var(--blue-bright), transparent);
+  transform: translateX(-50%);
+}
