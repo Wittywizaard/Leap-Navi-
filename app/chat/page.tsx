@@ -47,7 +47,7 @@ function parseRoadmap(text: string): Roadmap | null {
 }
 
 function cleanText(text: string): string {
-  return text.replace(/<PATHS>[\s\S]*?<\/PATHS>/g, "").replace(/<ROADMAP>[\s\S]*?<\/ROADMAP>/g, "").trim();
+  return text.replace(/<PATHS>[\s\S]*?<\/PATHS>/g, "").replace(/<ROADMAP>[\s\S]*?<\/ROADMAP>/g, "").replace("<CONSTRAINT_FORM>", "").trim();
 }
 
 function TypingDots() {
@@ -171,18 +171,60 @@ function RoadmapView({ roadmap }: { roadmap: Roadmap }) {
   );
 }
 
-function MessageBubble({ msg }: { msg: Message }) {
+function ConstraintForm({ onSubmit }: { onSubmit: (text: string) => void }) {
+  const [salary, setSalary] = useState("₹15L - ₹20L");
+  const [location, setLocation] = useState("Remote");
+  const [driver, setDriver] = useState("Work-Life Balance");
+
+  return (
+    <div style={{ background: "#F7FAFF", padding: 24, borderRadius: 16, border: "1px solid rgba(29,111,232,0.15)", marginTop: 12, display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--blue-bright)", textTransform: "uppercase", letterSpacing: 0.5 }}>Your Constraints</div>
+      
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--blue-deep)" }}>1. Minimum Salary</div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["< ₹10L", "₹10L - ₹15L", "₹15L - ₹20L", "> ₹20L"].map(opt => (
+            <button key={opt} onClick={() => setSalary(opt)} style={{ padding: "8px 16px", borderRadius: 100, border: "1px solid rgba(29,111,232,0.2)", background: salary === opt ? "var(--blue-bright)" : "white", color: salary === opt ? "white" : "#5A7494", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{opt}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--blue-deep)" }}>2. Location Preference</div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["Remote", "Hybrid", "On-site", "Open to relocate"].map(opt => (
+            <button key={opt} onClick={() => setLocation(opt)} style={{ padding: "8px 16px", borderRadius: 100, border: "1px solid rgba(29,111,232,0.2)", background: location === opt ? "var(--blue-bright)" : "white", color: location === opt ? "white" : "#5A7494", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{opt}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: "var(--blue-deep)" }}>3. Primary Driver</div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["Work-Life Balance", "Maximum Learning", "Fastest Path to Leadership", "Stability"].map(opt => (
+            <button key={opt} onClick={() => setDriver(opt)} style={{ padding: "8px 16px", borderRadius: 100, border: "1px solid rgba(29,111,232,0.2)", background: driver === opt ? "var(--blue-bright)" : "white", color: driver === opt ? "white" : "#5A7494", fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>{opt}</button>
+          ))}
+        </div>
+      </div>
+
+      <button onClick={() => onSubmit(`I need a minimum salary of ${salary}, prefer ${location} roles, and my primary driver right now is ${driver}.`)} style={{ marginTop: 12, padding: "12px 24px", background: "linear-gradient(135deg, #1D6FE8, #4D9EFF)", color: "white", borderRadius: 12, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", boxShadow: "0 4px 12px rgba(29,111,232,0.25)" }}>Submit Constraints →</button>
+    </div>
+  );
+}
+
+function MessageBubble({ msg, onSendConstraint }: { msg: Message, onSendConstraint?: (text: string) => void }) {
   const isUser = msg.role === "user";
   const paths = !isUser ? parsePaths(msg.content) : null;
   const roadmap = !isUser ? parseRoadmap(msg.content) : null;
   const displayText = !isUser ? cleanText(msg.content) : msg.content;
+  const hasConstraintForm = !isUser && msg.content.includes("<CONSTRAINT_FORM>");
 
   return (
     <div className="msg-appear" style={{ display: "flex", flexDirection: isUser ? "row-reverse" : "row", gap: 10, marginBottom: 20, alignItems: "flex-start" }}>
       {!isUser && (
         <div style={{ width: 36, height: 36, borderRadius: 11, background: "linear-gradient(135deg,#1D6FE8,#4D9EFF)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: 14, flexShrink: 0, boxShadow: "0 4px 12px rgba(29,111,232,0.3)" }}>N</div>
       )}
-      <div style={{ maxWidth: "80%", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ maxWidth: "80%", display: "flex", flexDirection: "column", gap: 12, width: "100%" }}>
         {displayText && (
           <div style={{
             padding: "14px 18px", borderRadius: isUser ? "20px 20px 6px 20px" : "6px 20px 20px 20px",
@@ -194,6 +236,7 @@ function MessageBubble({ msg }: { msg: Message }) {
             whiteSpace: "pre-wrap"
           }}>{displayText}</div>
         )}
+        {hasConstraintForm && onSendConstraint && <ConstraintForm onSubmit={onSendConstraint} />}
         {paths && <PathCards paths={paths} onSelect={() => {}} />}
         {roadmap && <RoadmapView roadmap={roadmap} />}
       </div>
@@ -343,9 +386,15 @@ export default function ChatPage() {
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(28px,5vw,40px)", fontWeight: 800, color: "var(--blue-deep)", marginBottom: 12 }}>
               Find your next career move.
             </h1>
-            <p style={{ fontSize: 16, color: "#5A7494", marginBottom: 36, lineHeight: 1.6 }}>
-              Upload your resume and Navi will analyze your background, surface career signals, and generate personalized paths with real roadmaps according to your profile.
+            <p style={{ fontSize: 16, color: "#5A7494", marginBottom: 20, lineHeight: 1.6 }}>
+              Upload your resume and Navi will analyze your background, surface career signals, and generate personalized paths with real roadmaps.
             </p>
+            <div style={{ padding: "14px 20px", background: "rgba(29,111,232,0.06)", borderRadius: 12, border: "1px solid rgba(29,111,232,0.15)", marginBottom: 36, display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
+              <div style={{ fontSize: 20 }}>👋</div>
+              <div style={{ fontSize: 14, color: "var(--blue-deep)", fontWeight: 500, lineHeight: 1.5 }}>
+                <span style={{ fontWeight: 700 }}>Welcome!</span> We'll start with your resume, then ask you 2 quick questions before generating your paths.
+              </div>
+            </div>
             {/* Upload zone */}
             <div
               className={`upload-zone ${isDragOver ? "active" : ""}`}
@@ -405,6 +454,9 @@ export default function ChatPage() {
                           boxShadow: isUser ? "0 4px 16px rgba(29,111,232,0.25)" : "0 2px 12px rgba(0,0,0,0.06)",
                           whiteSpace: "pre-wrap"
                         }}>{displayText}</div>
+                      )}
+                      {!isUser && msg.content.includes("<CONSTRAINT_FORM>") && msg.id === messages[messages.length - 1].id && (
+                        <ConstraintForm onSubmit={sendMessage} />
                       )}
                       {paths && (
                         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

@@ -21,9 +21,19 @@ You're a strong candidate for roles that blend analytical thinking with executio
 
 ---
 
-So, what's on your mind for the next step? And what do you want right now in your life?`;
+To make sure the career paths I generate for you are actually viable and personalized to your reality, I need to know your constraints. 
 
-const MOCK_PATHS = `Great — that gives me a much clearer picture. Based on everything in your resume and what you just told me, here are three paths that I genuinely think are worth exploring for someone at your stage:
+**Tell me:**
+1. What is your absolute hard floor for salary? (e.g., ₹15L, $80k)
+2. Are there any geographic constraints? (e.g., Must be remote, willing to relocate)
+3. What is your primary driver right now? (e.g., Work-life balance, maximum learning, fastest path to leadership)
+
+Let me know, and I'll build your top 3 personalized paths.
+<CONSTRAINT_FORM>`;
+
+const MOCK_PATHS = `Got it. Those are perfectly reasonable constraints, and keeping them in mind, I've filtered out paths that wouldn't meet your salary floor or flexibility needs. 
+
+Based on your resume and your specific constraints, here are three paths that I genuinely think are worth exploring for someone at your stage:
 
 <PATHS>
 [
@@ -675,6 +685,15 @@ export async function POST(req: NextRequest) {
 // 1. Get a free API key at https://aistudio.google.com/app/apikey
 // 2. Add GEMINI_API_KEY=AIza... to your .env.local file
 // 3. Uncomment the LIVE MODE block below and delete the mock handler above
+//
+// const SYSTEM_PROMPT = \`You are an elite, empathetic executive career coach.
+// Rule 1: Always open by naming a tension or opportunity from their resume.
+// Rule 2: IMPORTANT: Before generating any paths, you MUST ask the user 3 questions to capture their constraints:
+// - Absolute hard floor for salary
+// - Geographic constraints (remote, location)
+// - Primary driver (WLB, learning, leadership)
+// Rule 3: Only after receiving constraints, provide 3 highly personalized paths wrapped in <PATHS> JSON array tags.
+// Rule 4: If they select a path, generate a week-by-week execution plan wrapped in <ROADMAP> JSON tags.\`;
 //
 // export async function POST(req: NextRequest) {
 //   try {
