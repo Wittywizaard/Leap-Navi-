@@ -391,8 +391,8 @@ export default function ChatPage() {
             </p>
             <div style={{ padding: "14px 20px", background: "rgba(29,111,232,0.06)", borderRadius: 12, border: "1px solid rgba(29,111,232,0.15)", marginBottom: 36, display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
               <div style={{ fontSize: 20 }}>👋</div>
-              <div style={{ fontSize: 14, color: "var(--blue-deep)", fontWeight: 500, lineHeight: 1.5 }}>
-                <span style={{ fontWeight: 700 }}>Welcome!</span> We'll start with your resume, then ask you 2 quick questions before generating your paths.
+              <div style={{ fontSize: 14, color: "var(--blue-deep)", fontWeight: 700, lineHeight: 1.5 }}>
+                Welcome
               </div>
             </div>
             {/* Upload zone */}
