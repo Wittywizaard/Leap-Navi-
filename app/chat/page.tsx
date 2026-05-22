@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Message {
   role: "user" | "assistant";
@@ -209,6 +210,7 @@ export default function ChatPage() {
   const [uploadedName, setUploadedName] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
   const [phase, setPhase] = useState<"upload" | "chat">("upload");
+  const [pathRound, setPathRound] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -288,6 +290,12 @@ export default function ChatPage() {
     sendMessage(`I'd like to explore the ${path.title} path. Please build me a detailed roadmap for this career transition.`);
   };
 
+  const handleRegeneratePaths = () => {
+    const nextRound = pathRound + 1;
+    setPathRound(nextRound);
+    sendMessage(`__REGEN_PATHS_ROUND_${nextRound}__`);
+  };
+
   // Inject path selection handler into messages
   const messagesWithHandlers = messages.map(msg => {
     if (msg.role === "assistant") {
@@ -320,7 +328,7 @@ export default function ChatPage() {
           )}
         </div>
         {phase === "chat" && (
-          <button onClick={() => { setPhase("upload"); setMessages([]); setResumeText(""); setUploadedName(""); }} style={{
+          <button onClick={() => { setPhase("upload"); setMessages([]); setResumeText(""); setUploadedName(""); setPathRound(0); }} style={{
             padding: "8px 16px", background: "rgba(29,111,232,0.06)", border: "1px solid rgba(29,111,232,0.15)",
             borderRadius: 100, fontSize: 13, color: "var(--blue-bright)", fontWeight: 600, cursor: "pointer"
           }}>+ New Resume</button>
@@ -399,34 +407,52 @@ export default function ChatPage() {
                         }}>{displayText}</div>
                       )}
                       {paths && (
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-                          {paths.map((p, i) => {
-                            const effortColor = (e: string) => e === "Low" ? "#22C55E" : e === "Medium" ? "#F59E0B" : "#EF4444";
-                            return (
-                              <button key={p.id} onClick={() => handlePathSelect(p)} className="path-card" style={{
-                                borderRadius: 18, padding: "22px 20px", border: "1.5px solid rgba(29,111,232,0.15)",
-                                textAlign: "left", cursor: "pointer", background: "white", position: "relative", overflow: "hidden"
-                              }}>
-                                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ["linear-gradient(90deg,#1D6FE8,#4D9EFF)", "linear-gradient(90deg,#7C3AED,#A78BFA)", "linear-gradient(90deg,#059669,#34D399)"][i % 3] }} />
-                                <div style={{ fontSize: 11, fontWeight: 600, color: "#7A93B0", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Path {String.fromCharCode(65 + i)}</div>
-                                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--blue-deep)", marginBottom: 6, lineHeight: 1.2 }}>{p.title}</div>
-                                <p style={{ fontSize: 13, color: "#5A7494", lineHeight: 1.5, marginBottom: 14 }}>{p.hook}</p>
-                                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
-                                  <span style={{ padding: "4px 10px", background: "rgba(29,111,232,0.08)", borderRadius: 100, fontSize: 12, color: "var(--blue-bright)", fontWeight: 600 }}>{p.salaryRange}</span>
-                                  <span style={{ padding: "4px 10px", background: "rgba(0,0,0,0.04)", borderRadius: 100, fontSize: 12, color: "#5A7494" }}>⏱ {p.timeline}</span>
-                                  <span style={{ padding: "4px 10px", background: `${effortColor(p.effort)}15`, borderRadius: 100, fontSize: 12, color: effortColor(p.effort), fontWeight: 600 }}>{p.effort} effort</span>
-                                </div>
-                                <div style={{ marginBottom: 14 }}>
-                                  <div style={{ fontSize: 11, color: "#7A93B0", marginBottom: 6, fontWeight: 600 }}>SKILL GAPS</div>
-                                  <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                                    {p.skillGaps.map(s => <span key={s} style={{ padding: "3px 8px", background: "#F0F4FF", borderRadius: 6, fontSize: 11, color: "#3B6FC7" }}>{s}</span>)}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
+                            {paths.map((p, i) => {
+                              const effortColor = (e: string) => e === "Low" ? "#22C55E" : e === "Medium" ? "#F59E0B" : "#EF4444";
+                              return (
+                                <button key={p.id} onClick={() => handlePathSelect(p)} className="path-card" style={{
+                                  borderRadius: 18, padding: "22px 20px", border: "1.5px solid rgba(29,111,232,0.15)",
+                                  textAlign: "left", cursor: "pointer", background: "white", position: "relative", overflow: "hidden"
+                                }}>
+                                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: ["linear-gradient(90deg,#1D6FE8,#4D9EFF)", "linear-gradient(90deg,#7C3AED,#A78BFA)", "linear-gradient(90deg,#059669,#34D399)"][i % 3] }} />
+                                  <div style={{ fontSize: 11, fontWeight: 600, color: "#7A93B0", letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>Path {String.fromCharCode(65 + i)}</div>
+                                  <div style={{ fontSize: 18, fontWeight: 800, color: "var(--blue-deep)", marginBottom: 6, lineHeight: 1.2 }}>{p.title}</div>
+                                  <p style={{ fontSize: 13, color: "#5A7494", lineHeight: 1.5, marginBottom: 14 }}>{p.hook}</p>
+                                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+                                    <span style={{ padding: "4px 10px", background: "rgba(29,111,232,0.08)", borderRadius: 100, fontSize: 12, color: "var(--blue-bright)", fontWeight: 600 }}>{p.salaryRange}</span>
+                                    <span style={{ padding: "4px 10px", background: "rgba(0,0,0,0.04)", borderRadius: 100, fontSize: 12, color: "#5A7494" }}>⏱ {p.timeline}</span>
+                                    <span style={{ padding: "4px 10px", background: `${effortColor(p.effort)}15`, borderRadius: 100, fontSize: 12, color: effortColor(p.effort), fontWeight: 600 }}>{p.effort} effort</span>
                                   </div>
-                                </div>
-                                <div style={{ padding: "12px 14px", background: "rgba(29,111,232,0.04)", borderRadius: 10, fontSize: 12, color: "#4A5E7A", lineHeight: 1.5 }}>{p.whyFit}</div>
-                                <div style={{ marginTop: 16, padding: "10px 0", textAlign: "center", borderTop: "1px solid rgba(29,111,232,0.1)", fontSize: 13, fontWeight: 700, color: "var(--blue-bright)" }}>Choose this path →</div>
-                              </button>
-                            );
-                          })}
+                                  <div style={{ marginBottom: 14 }}>
+                                    <div style={{ fontSize: 11, color: "#7A93B0", marginBottom: 6, fontWeight: 600 }}>SKILL GAPS</div>
+                                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                                      {p.skillGaps.map(s => <span key={s} style={{ padding: "3px 8px", background: "#F0F4FF", borderRadius: 6, fontSize: 11, color: "#3B6FC7" }}>{s}</span>)}
+                                    </div>
+                                  </div>
+                                  <div style={{ padding: "12px 14px", background: "rgba(29,111,232,0.04)", borderRadius: 10, fontSize: 12, color: "#4A5E7A", lineHeight: 1.5 }}>{p.whyFit}</div>
+                                  <div style={{ marginTop: 16, padding: "10px 0", textAlign: "center", borderTop: "1px solid rgba(29,111,232,0.1)", fontSize: 13, fontWeight: 700, color: "var(--blue-bright)" }}>Choose this path →</div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {/* "Show different paths" button — only on the latest path message and if loop isn't closed */}
+                          {msg.id === messages.filter(m => m.role === "assistant" && m.content.includes("<PATHS>")).slice(-1)[0]?.id && pathRound < 3 && !loading && (
+                            <button
+                              onClick={handleRegeneratePaths}
+                              style={{
+                                alignSelf: "flex-start", padding: "10px 20px",
+                                background: "white", border: "1.5px solid rgba(29,111,232,0.25)",
+                                borderRadius: 100, fontSize: 13, color: "var(--blue-bright)",
+                                fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
+                                boxShadow: "0 2px 8px rgba(29,111,232,0.08)", transition: "all 0.2s"
+                              }}
+                            >
+                              🔄 None of these feel right — show me 3 different paths
+                              <span style={{ fontSize: 11, color: "#7A93B0", fontWeight: 400 }}>({3 - pathRound} left)</span>
+                            </button>
+                          )}
                         </div>
                       )}
                       {roadmap && (() => {
@@ -480,10 +506,33 @@ export default function ChatPage() {
                               <div style={{ marginTop: 20, padding: "16px 20px", background: "rgba(29,111,232,0.05)", borderRadius: 12 }}>
                                 <div style={{ fontSize: 12, fontWeight: 700, color: "#7A93B0", marginBottom: 10 }}>JOB BOARDS TO TARGET</div>
                                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                                  {roadmap.jobBoards.map(j => <span key={j} style={{ padding: "5px 12px", background: "white", borderRadius: 100, fontSize: 12, fontWeight: 600, color: "var(--blue-deep)", border: "1px solid rgba(29,111,232,0.12)" }}>{j}</span>)}
+                                  {roadmap.jobBoards.map((j: string) => <span key={j} style={{ padding: "5px 12px", background: "white", borderRadius: 100, fontSize: 12, fontWeight: 600, color: "var(--blue-deep)", border: "1px solid rgba(29,111,232,0.12)" }}>{j}</span>)}
                                 </div>
                               </div>
                             )}
+
+                            {/* LAUNCH DASHBOARD CTA */}
+                            <button
+                              onClick={() => {
+                                localStorage.setItem("navi_roadmap", JSON.stringify(roadmap));
+                                const router = require("next/navigation").useRouter;
+                                window.location.href = "/dashboard";
+                              }}
+                              style={{
+                                width: "100%", marginTop: 24, padding: "18px 24px",
+                                background: "linear-gradient(135deg, #1D6FE8, #4D9EFF)",
+                                borderRadius: 16, color: "white", fontSize: 16, fontWeight: 800,
+                                border: "none", cursor: "pointer", display: "flex", justifyContent: "space-between",
+                                alignItems: "center", boxShadow: "0 8px 24px rgba(29,111,232,0.3)",
+                                transition: "transform 0.2s"
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-2px)"}
+                              onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}
+                            >
+                              <span>Launch My Full Career Dashboard 🚀</span>
+                              <span style={{ fontSize: 20 }}>→</span>
+                            </button>
+
                           </div>
                         );
                       })()}
