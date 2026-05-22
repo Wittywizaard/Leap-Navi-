@@ -389,11 +389,11 @@ export default function ChatPage() {
             <p style={{ fontSize: 16, color: "#5A7494", marginBottom: 20, lineHeight: 1.6 }}>
               Upload your resume and Navi will analyze your background, surface career signals, and generate personalized paths with real roadmaps.
             </p>
-            <div style={{ padding: "14px 20px", background: "rgba(29,111,232,0.06)", borderRadius: 12, border: "1px solid rgba(29,111,232,0.15)", marginBottom: 36, display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
-              <div style={{ fontSize: 20 }}>👋</div>
-              <div style={{ fontSize: 14, color: "var(--blue-deep)", fontWeight: 700, lineHeight: 1.5 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 36 }}>
+              <div style={{ fontSize: 16, color: "var(--blue-deep)", fontWeight: 700 }}>
                 Welcome
               </div>
+              <div style={{ fontSize: 20 }}>👋</div>
             </div>
             {/* Upload zone */}
             <div
